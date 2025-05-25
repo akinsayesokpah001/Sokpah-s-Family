@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sokpah Family Records</title>
+  <style>
+    body { font-family: Arial; background: #f0f0f5; padding: 20px; }
+    h2 { color: darkgreen; }
+    .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #aaa; }
+    label { display: block; margin-top: 10px; }
+    input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+    button { margin-top: 15px; padding: 10px; background: darkgreen; color: white; border: none; cursor: pointer; }
+    .member-card { border: 1px solid #ccc; border-radius: 10px; padding: 10px; margin-top: 20px; background: #f9f9f9; }
+    img { max-width: 100px; border-radius: 50%; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Sokpah Family Members Database</h2>
+    <form id="memberForm">
+      <label>Full Name</label>
+      <input type="text" id="name" required>
+
+      <label>Phone Number</label>
+      <input type="text" id="phone" required>
+
+      <label>Address</label>
+      <textarea id="address" required></textarea>
+
+      <label>Picture URL</label>
+      <input type="text" id="picture" placeholder="Paste image link">
+
+      <label>Children Names (comma-separated)</label>
+      <input type="text" id="children">
+
+      <label>Children Date of Births (comma-separated, in order)</label>
+      <input type="text" id="childrenDOB">
+
+      <button type="submit">Save Member</button>
+    </form>
+
+    <div id="familyList"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById("memberForm");
+    const familyList = document.getElementById("familyList");
+
+    function loadMembers() {
+      const members = JSON.parse(localStorage.getItem("sokpahFamily") || "[]");
+      familyList.innerHTML = "";
+      members.forEach((member, index) => {
+        const card = document.createElement("div");
+        card.className = "member-card";
+        card.innerHTML = `
+          <img src="${member.picture}" alt="Photo of ${member.name}">
+          <h3>${member.name}</h3>
+          <p><strong>Phone:</strong> ${member.phone}</p>
+          <p><strong>Address:</strong> ${member.address}</p>
+          <p><strong>Children:</strong> ${member.children.map((child, i) => `${child} (${member.childrenDOB[i]})`).join(", ")}</p>
+        `;
+        familyList.appendChild(card);
+      });
+    }
+
+    form.onsubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const address = document.getElementById("address").value.trim();
+      const picture = document.getElementById("picture").value.trim();
+      const children = document.getElementById("children").value.split(",").map(c => c.trim()).filter(Boolean);
+      const childrenDOB = document.getElementById("childrenDOB").value.split(",").map(c => c.trim());
+
+      const newMember = { name, phone, address, picture, children, childrenDOB };
+      const members = JSON.parse(localStorage.getItem("sokpahFamily") || "[]");
+      members.push(newMember);
+      localStorage.setItem("sokpahFamily", JSON.stringify(members));
+
+      form.reset();
+      loadMembers();
+    }
+
+    loadMembers();
+  </script>
+</body>
+</html>
